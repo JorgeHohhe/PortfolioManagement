@@ -29,7 +29,7 @@ def plot_graph_from_dataframe(df, days_of_data):
     plt.xlabel('Days')
     plt.ylabel('Daily Return (%)')
     plt.legend(df.columns)
-    plt.savefig('output/Sample.png')
+    plt.savefig(f'output/Sample-{len(df.columns)}stocks-{days_of_data}days.png')
 
 if __name__ == "__main__":
     create_directory('output')
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
     volatility  = [0.10, 0.15, 0.02]
 
-    days_of_data = 50  # (365 days * 10 years) of data
+    days_of_data = 10  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
     for k, stock_name in enumerate(stock_names):
@@ -48,6 +48,10 @@ if __name__ == "__main__":
             df.loc[i, stock_name] = daily_return 
     df = df.drop(['Placeholder'], axis=1)
     print(df)
+
+    print('\nExpected Return:')
+    for column in df.columns:
+        print(column, df[column].mean())
     
     plot_graph_from_dataframe(df, days_of_data)
 
