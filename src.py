@@ -10,10 +10,8 @@ def create_directory(directory_name):
         os.mkdir(directory_name)
 
 def get_daily_return_value(stock_price, volatility):
-    rnd = random.random()  # generate number, 0 <= x < 1.0
+    rnd = random.random() - 0.5  # generate number, 0.5 <= x < 0.5
     change_percent = 2 * volatility * rnd
-    if (change_percent > volatility):
-        change_percent -= (2 * volatility)
     change_amount = stock_price * change_percent
     new_stock_price = stock_price + change_amount
     daily_return = (new_stock_price - stock_price) / stock_price
@@ -31,6 +29,7 @@ def plot_graph_from_dataframe(df, days_of_data):
         axs[0].plot(x_daily_return, y_daily_return)
         axs[0].grid()
         axs[0].set_ylabel('Daily Return (%)')
+        axs[0].legend(df.columns, loc=3)
 
         y_stock_price = [1000]
         for i, daily_return in enumerate(y_daily_return):
@@ -39,7 +38,6 @@ def plot_graph_from_dataframe(df, days_of_data):
         axs[1].grid()
         axs[1].set_xlabel('Days')
         axs[1].set_ylabel('Stock Price ($)')
-        axs[1].legend(df.columns)
     
     fig.savefig(f'output/Sample-{len(df.columns)}stocks-{days_of_data}days.png')
 
@@ -56,7 +54,7 @@ if __name__ == "__main__":
         stock_price = 1000
         df[stock_name] = pd.Series([], dtype=np.float64)
         for i in range(days_of_data): 
-            stock_price, daily_return = get_daily_return_value(stock_price, volatility[k]) # 2%
+            stock_price, daily_return = get_daily_return_value(stock_price, volatility[k])
             df.loc[i, stock_name] = daily_return
     df = df.drop(['Placeholder'], axis=1)
     print(df)
