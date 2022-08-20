@@ -34,11 +34,11 @@ def plot_graph_from_dataframe(df, days_of_data):
         axs[0].set_ylabel('Daily Return (%)')
         axs[0].legend(df.columns, loc=3)
 
-        y_stock_price = [1000]
+        y_stock_price = [10]
         for i, daily_return in enumerate(y_daily_return):
             y_stock_price.append(y_stock_price[i] * (1+daily_return/100))
         axs[1].plot(x_stock_price, y_stock_price)
-        axs[1].plot(x_stock_price, [1000]*len(x_stock_price), 'k--')
+        axs[1].plot(x_stock_price, [10]*len(x_stock_price), 'k--')
         axs[1].grid()
         axs[1].set_xlabel('Days')
         axs[1].set_ylabel('Stock Price ($)')
@@ -46,7 +46,7 @@ def plot_graph_from_dataframe(df, days_of_data):
     fig.savefig(f'output/Sample-{len(df.columns)}stocks-{days_of_data}days.png')
 
 if __name__ == "__main__":
-    # To grants reprodutibility
+    # To grants code reproducibility
     np.random.seed(0)
 
     create_directory('output')
@@ -54,11 +54,11 @@ if __name__ == "__main__":
     stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
     volatility  = [0.10, 0.15, 0.02]
 
-    days_of_data = 100  # (365 days * 10 years) of data
+    days_of_data = 365  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
     for k, stock_name in enumerate(stock_names):
-        stock_price = 1000
+        stock_price = 10
         df[stock_name] = pd.Series([], dtype=np.float64)
         for i in range(days_of_data): 
             stock_price, daily_return = get_daily_return_value(stock_price, volatility[k])
