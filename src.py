@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import random
 import os
 
 
@@ -10,10 +9,14 @@ def create_directory(directory_name):
         os.mkdir(directory_name)
 
 def get_daily_return_value(stock_price, volatility):
-    rnd = random.random() - 0.5  # generate number, 0.5 <= x < 0.5
+    rnd = np.random.random() - 0.5  # generate number, 0.5 <= x < 0.5
     change_percent = 2 * volatility * rnd
     change_amount = stock_price * change_percent
     new_stock_price = stock_price + change_amount
+    # Simple heuristic to not lead with negative values of stock price (unreal scenario)
+    if new_stock_price < 0:
+        new_stock_price = abs(new_stock_price)
+    # Calcutate daily return
     daily_return = (new_stock_price - stock_price) / stock_price
     return new_stock_price, daily_return * 100
 
@@ -35,6 +38,7 @@ def plot_graph_from_dataframe(df, days_of_data):
         for i, daily_return in enumerate(y_daily_return):
             y_stock_price.append(y_stock_price[i] * (1+daily_return/100))
         axs[1].plot(x_stock_price, y_stock_price)
+        axs[1].plot(x_stock_price, [1000]*len(x_stock_price), 'k--')
         axs[1].grid()
         axs[1].set_xlabel('Days')
         axs[1].set_ylabel('Stock Price ($)')
@@ -42,12 +46,15 @@ def plot_graph_from_dataframe(df, days_of_data):
     fig.savefig(f'output/Sample-{len(df.columns)}stocks-{days_of_data}days.png')
 
 if __name__ == "__main__":
+    # To grants reprodutibility
+    np.random.seed(0)
+
     create_directory('output')
 
     stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
     volatility  = [0.10, 0.15, 0.02]
 
-    days_of_data = 10  # (365 days * 10 years) of data
+    days_of_data = 100  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
     for k, stock_name in enumerate(stock_names):
