@@ -35,7 +35,7 @@ def get_daily_return_value(df, stock_price, stock_name):
     daily_return = (new_stock_price - stock_price) / stock_price
     return new_stock_price, daily_return * 100
 
-def plot_graph_from_dataframe(df, days_of_data):
+def plot_graph_from_dataframe(df, days_of_data, graph_name):
     fig, axs = plt.subplots(2)
     fig.suptitle('Stocks Data')
 
@@ -62,8 +62,8 @@ def plot_graph_from_dataframe(df, days_of_data):
     axs[1].set_xlabel('Days')
     axs[1].set_ylabel('Stock Price ($)')
 
-    fig.savefig(f'output/Sample-{len(df.columns)//2}stocks-{days_of_data}days.png')
-    print(f'Figure saved in: output/Sample-{len(df.columns)//2}stocks-{days_of_data}days.png')
+    fig.savefig(f'output/{graph_name}-{len(df.columns)//2}stocks-{days_of_data}days.png')
+    print(f'Figure saved in: output/{graph_name}-{len(df.columns)//2}stocks-{days_of_data}days.png')
 
 if __name__ == "__main__":
     # To grants code reproducibility
@@ -91,6 +91,8 @@ if __name__ == "__main__":
     for column in df.columns:
         print(column, df[column].mean())
     
-    plot_graph_from_dataframe(df, days_of_data)
+    plot_graph_from_dataframe(df, days_of_data, 'Sample')
+    for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
+        plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
 
     print('\nPipeline Finished!')
