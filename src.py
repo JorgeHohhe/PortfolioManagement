@@ -16,8 +16,9 @@ def get_standard_deviation_of_df_column(df_column):
 
 def get_daily_return_value(df, stock_name):
     # GBM (Geometric Brownian Motion)
+    volatility = np.random.uniform(low=0.001, high=0.02)
     # Correlation beetween stock and market (10.7)=10*(1+i)^365 for 7% a.a.
-    returns = np.random.normal(loc=0.0001854, scale=0.01, size=1)
+    returns = np.random.normal(loc=0.0001854, scale=volatility, size=1)
     new_stock_price = stock_price*(1+returns)
     # Simple heuristic to not lead with negative values of stock price (unreal scenario)
     if new_stock_price < 0:
@@ -41,14 +42,14 @@ def plot_graph_from_dataframe(df, days_of_data):
             axs[0].plot(x_daily_return, y_daily_return)
             
         else:
-            y_stock_price = np.append([10], df[column])
+            y_stock_price = np.append([100], df[column])
             axs[1].plot(x_stock_price, y_stock_price)
     
     axs[0].grid()
     axs[0].set_ylabel('Daily Return (%)')
     axs[0].legend(legend_columns, loc=3)
 
-    axs[1].plot(x_stock_price, [10]*len(x_stock_price), 'k--')
+    axs[1].plot(x_stock_price, [100]*len(x_stock_price), 'k--')
     axs[1].grid()
     axs[1].set_xlabel('Days')
     axs[1].set_ylabel('Stock Price ($)')
@@ -63,13 +64,12 @@ if __name__ == "__main__":
     create_directory('output')
 
     stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
-    # volatility  = [0.10, 0.15, 0.02]
 
     days_of_data = 365  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
     for k, stock_name in enumerate(stock_names):
-        stock_price = 10
+        stock_price = 100
         df[stock_name] = pd.Series([], dtype=np.float64)
         df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
         for i in range(days_of_data): 
