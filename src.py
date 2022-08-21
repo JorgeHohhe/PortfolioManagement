@@ -14,11 +14,19 @@ def get_mean_of_df_column(df_column):
 def get_standard_deviation_of_df_column(df_column):
     return np.std(df_column)
 
-def get_daily_return_value(df, stock_name):
-    # GBM (Geometric Brownian Motion)
+def get_daily_return_value(df, stock_price, stock_name):
+    # GBM (Geometric Brownian Motion) + random volatility
     volatility = np.random.uniform(low=0.001, high=0.02)
-    # Correlation beetween stock and market (10.7)=10*(1+i)^365 for 7% a.a.
+    # Correlation between stock and market (10.7)=10*(1+i)^365 for 7% a.a.
     returns = np.random.normal(loc=0.0001854, scale=volatility, size=1)
+    # Correlation between same market sector stocks
+    if '_1' not in stock_name:
+        if np.random.random() < 0.9: # chance of 90% to update returns
+            if df[stock_name[:-2] + '_1'] > 0: # positive daily return
+                    returns = abs(returns)
+            else:
+                returns = (-1) * abs(returns)
+    # Update stock price
     new_stock_price = stock_price*(1+returns)
     # Simple heuristic to not lead with negative values of stock price (unreal scenario)
     if new_stock_price < 0:
@@ -63,7 +71,7 @@ if __name__ == "__main__":
 
     create_directory('output')
 
-    stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
+    stock_names = ['TECH_1', 'TECH_2','FINACIAL_1']
 
     days_of_data = 365  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
@@ -73,7 +81,7 @@ if __name__ == "__main__":
         df[stock_name] = pd.Series([], dtype=np.float64)
         df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
         for i in range(days_of_data): 
-            stock_price, daily_return = get_daily_return_value(df, stock_name)
+            stock_price, daily_return = get_daily_return_value(df.loc[i], stock_price, stock_name)
             df.loc[i, stock_name] = daily_return
             df.loc[i, stock_name + '_PRICE'] = stock_price
     df = df.drop(['Placeholder'], axis=1)
