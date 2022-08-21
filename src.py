@@ -15,40 +15,16 @@ def get_standard_deviation_of_df_column(df_column):
     return np.std(df_column)
 
 def get_daily_return_value(df, stock_name):
-    # GBM (Geometric Brownian Motion) + random volatility
-    # volatility = np.random.random()
+    # GBM (Geometric Brownian Motion)
     # Correlation beetween stock and market (10.7)=10*(1+i)^365 for 7% a.a.
-    # Parameters
-    # drift coefficent
-    mu = 0.0001854
-    # number of steps
-    n = 364
-    # time in years
-    T = 1
-    # number of sims
-    M = 1
-    # initial stock price
-    S0 = 100
-    # volatility
-    sigma = 0.3
-    # calc each time step
-    dt = T/n
-    # simulation using numpy arrays
-    St = np.exp((mu - sigma ** 2 / 2) * dt + sigma * np.random.normal(0, np.sqrt(dt), size=(M,n)).T)
-    # include array of 1's
-    St = np.vstack([np.ones(M), St])
-    # multiply through by S0 and return the cumulative product of elements along a given simulation path axis=0. 
-    stock_price = S0 * St.cumprod(axis=0)
-
-    # returns = np.random.normal(loc=0.0001854, scale=0.01, size=1)
-    # new_stock_price = stock_price*(1+returns)
+    returns = np.random.normal(loc=0.0001854, scale=0.01, size=1)
+    new_stock_price = stock_price*(1+returns)
     # Simple heuristic to not lead with negative values of stock price (unreal scenario)
-    stock_price = abs(stock_price)
+    if new_stock_price < 0:
+        new_stock_price = abs(new_stock_price)
     # Calcutate daily return
-    daily_return = []
-    for i in range(len(stock_price)-1):
-        daily_return += [((stock_price[i+1] - stock_price[i]) / stock_price[i]) * 100]
-    return stock_price, daily_return
+    daily_return = (new_stock_price - stock_price) / stock_price
+    return new_stock_price, daily_return * 100
 
 def plot_graph_from_dataframe(df, days_of_data):
     fig, axs = plt.subplots(2)
@@ -65,19 +41,20 @@ def plot_graph_from_dataframe(df, days_of_data):
             axs[0].plot(x_daily_return, y_daily_return)
             
         else:
-            y_stock_price = np.append([100], df[column])
+            y_stock_price = np.append([10], df[column])
             axs[1].plot(x_stock_price, y_stock_price)
     
     axs[0].grid()
     axs[0].set_ylabel('Daily Return (%)')
     axs[0].legend(legend_columns, loc=3)
 
-    axs[1].plot(x_stock_price, [100]*len(x_stock_price), 'k--')
+    axs[1].plot(x_stock_price, [10]*len(x_stock_price), 'k--')
     axs[1].grid()
     axs[1].set_xlabel('Days')
     axs[1].set_ylabel('Stock Price ($)')
 
-    fig.savefig(f'output/Sample-{len(df.columns)//2}stocks-{days_of_data}days-Oficial.png')
+    fig.savefig(f'output/Sample-{len(df.columns)//2}stocks-{days_of_data}days.png')
+    print(f'Figure saved in: output/Sample-{len(df.columns)//2}stocks-{days_of_data}days.png')
 
 if __name__ == "__main__":
     # To grants code reproducibility
@@ -86,16 +63,19 @@ if __name__ == "__main__":
     create_directory('output')
 
     stock_names = ['TECH', 'HEALTH CARE','FINACIAL']
+    # volatility  = [0.10, 0.15, 0.02]
 
     days_of_data = 365  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
     for k, stock_name in enumerate(stock_names):
-        stock_price, daily_return = get_daily_return_value(df, stock_name)
-        daily_return.append(np.nan)
-        daily_return = np.array(daily_return, dtype=np.float64)
-        df[stock_name] = daily_return
-        df[stock_name + '_PRICE'] = stock_price 
+        stock_price = 10
+        df[stock_name] = pd.Series([], dtype=np.float64)
+        df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
+        for i in range(days_of_data): 
+            stock_price, daily_return = get_daily_return_value(df, stock_name)
+            df.loc[i, stock_name] = daily_return
+            df.loc[i, stock_name + '_PRICE'] = stock_price
     df = df.drop(['Placeholder'], axis=1)
     print(df)
 
