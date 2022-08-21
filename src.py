@@ -55,7 +55,7 @@ def plot_graph_from_dataframe(df, days_of_data):
     
     axs[0].grid()
     axs[0].set_ylabel('Daily Return (%)')
-    axs[0].legend(legend_columns, loc=3)
+    axs[0].legend(legend_columns, loc=3, prop={'size': 6})
 
     axs[1].plot(x_stock_price, [100]*len(x_stock_price), 'k--')
     axs[1].grid()
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     create_directory('output')
 
-    stock_names = ['TECH_1', 'TECH_2','FINACIAL_1']
+    stock_names = ['CD_1', 'CD_2', 'CD_3', 'CS_1', 'CS_2', 'CS_3', 'TECH_1', 'TECH_2', 'UTILITIES_1', 'UTILITIES_2']
 
     days_of_data = 365  # (365 days * 10 years) of data
     df = pd.DataFrame({'Placeholder': [0]*days_of_data})
@@ -85,7 +85,7 @@ if __name__ == "__main__":
             df.loc[i, stock_name] = daily_return
             df.loc[i, stock_name + '_PRICE'] = stock_price
     df = df.drop(['Placeholder'], axis=1)
-    print(df)
+    # print(df)
 
     print('\nMean:')
     for column in df.columns:
