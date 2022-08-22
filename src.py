@@ -14,14 +14,28 @@ def get_mean_of_df_column(df_column):
 def get_standard_deviation_of_df_column(df_column):
     return np.std(df_column)
 
+def calculete_overall_portfolio_return(df, stock_names, weights):
+    overall_portfolio_return = 0
+    for i, stock_name in enumerate(stock_names):
+        overall_portfolio_return += weights[i] * df[stock_name].mean()
+    return overall_portfolio_return
+
+def calculete_portfolio_standard_deviation(df, stock_names, weights):
+    portfolio_standard_deviation = 0
+    for i, stock_name_i in enumerate(stock_names):
+        for j, stock_name_j in enumerate(stock_names):
+            portfolio_standard_deviation += weights[i] * weights[j] * get_standard_deviation_of_df_column(df[stock_name_i]) * get_standard_deviation_of_df_column(df[stock_name_j]) * np.corrcoef([df[stock_name_i], df[stock_name_j]])[0][1]
+    portfolio_standard_deviation = np.sqrt(portfolio_standard_deviation)
+    return portfolio_standard_deviation
+
 def get_daily_return_value(df, stock_price, stock_name):
     # GBM (Geometric Brownian Motion) + random volatility
-    volatility = np.random.uniform(low=0.001, high=0.02)
+    volatility = np.random.uniform(low=0.0004, high=0.004)
     # Correlation between stock and market (10.7)=10*(1+i)^365 for 7% a.a.
     returns = np.random.normal(loc=0.0001854, scale=volatility, size=1)
     # Correlation between same market sector stocks
     if '_1' not in stock_name:
-        if np.random.random() < 0.9: # chance of 90% to update returns
+        if np.random.random() < 0.90: # chance of 90% to update returns
             if df[stock_name[:-2] + '_1'] > 0: # positive daily return
                     returns = abs(returns)
             else:
@@ -87,10 +101,17 @@ if __name__ == "__main__":
     df = df.drop(['Placeholder'], axis=1)
     # print(df)
 
-    print('\nMean:')
-    for column in df.columns:
-        print(column, df[column].mean())
+    weights = [0.1]*10
+    overall_portfolio_return = calculete_overall_portfolio_return(df, stock_names, weights)
+    print(f'\nOverall Portfolio Return: {overall_portfolio_return} %')
     
+    portfolio_standard_deviation = calculete_portfolio_standard_deviation(df, stock_names, weights)
+    print(f'\nPortfolio Standard Deviation: {portfolio_standard_deviation}\n')
+
+    # print(np.corrcoef([df['TECH_1'], df['TECH_2']])[0][1])
+    # print(np.corrcoef([df['CD_1'], df['CD_2']])[0][1])
+    # print(np.corrcoef([df['CD_1'], df['CD_3']])[0][1])
+
     plot_graph_from_dataframe(df, days_of_data, 'Sample')
     for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
         plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
