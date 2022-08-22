@@ -84,22 +84,26 @@ if __name__ == "__main__":
     np.random.seed(0)
 
     create_directory('output')
+    create_directory('data')
 
     stock_names = ['CD_1', 'CD_2', 'CD_3', 'CS_1', 'CS_2', 'CS_3', 'TECH_1', 'TECH_2', 'UTILITIES_1', 'UTILITIES_2']
 
-    days_of_data = 365  # (365 days * 10 years) of data
-    df = pd.DataFrame({'Placeholder': [0]*days_of_data})
+    days_of_data = 365*10  # (365 days * 10 years) of data
+    df = pd.read_csv('data/Sample-10stocks-3650days.csv', sep='|')
+    # df = pd.DataFrame({'Placeholder': [0]*days_of_data})
 
-    for k, stock_name in enumerate(stock_names):
-        stock_price = 100
-        df[stock_name] = pd.Series([], dtype=np.float64)
-        df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
-        for i in range(days_of_data): 
-            stock_price, daily_return = get_daily_return_value(df.loc[i], stock_price, stock_name)
-            df.loc[i, stock_name] = daily_return
-            df.loc[i, stock_name + '_PRICE'] = stock_price
-    df = df.drop(['Placeholder'], axis=1)
-    # print(df)
+    # for k, stock_name in enumerate(stock_names):
+    #     stock_price = 100
+    #     df[stock_name] = pd.Series([], dtype=np.float64)
+    #     df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
+    #     for i in range(days_of_data): 
+    #         stock_price, daily_return = get_daily_return_value(df.loc[i], stock_price, stock_name)
+    #         df.loc[i, stock_name] = daily_return
+    #         df.loc[i, stock_name + '_PRICE'] = stock_price
+    # df = df.drop(['Placeholder'], axis=1)
+    # # Save the simutation
+    # df.to_csv(f'data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv', sep='|',index=False)
+    # print(f'Stocks Simulated Data saved in: data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv')
 
     weights = [0.1]*10
     overall_portfolio_return = calculete_overall_portfolio_return(df, stock_names, weights)
@@ -107,10 +111,6 @@ if __name__ == "__main__":
     
     portfolio_standard_deviation = calculete_portfolio_standard_deviation(df, stock_names, weights)
     print(f'\nPortfolio Standard Deviation: {portfolio_standard_deviation}\n')
-
-    # print(np.corrcoef([df['TECH_1'], df['TECH_2']])[0][1])
-    # print(np.corrcoef([df['CD_1'], df['CD_2']])[0][1])
-    # print(np.corrcoef([df['CD_1'], df['CD_3']])[0][1])
 
     plot_graph_from_dataframe(df, days_of_data, 'Sample')
     for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
