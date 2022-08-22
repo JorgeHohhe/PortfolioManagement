@@ -66,13 +66,21 @@ Applying the above formula to our simulated data, we have (equal weights between
 
 * Market Standard Deviation: 9.9909 %
 
+# Question 3
+
+
+
 # Future Works
 
-* Aplicate IL (Imitation Learning) to try to simulate Stock Market
+* Refactorize the code in more than only one .py file (main.py, generate_data.py, utils.py, ...)
+
+* Plot  efficient frontier graph (expected return x risk)
 
 * Consider national economy influence (Food and Staples Retailing Market has a high correlation with inflation)
 
-* Plot  efficient frontier graph (expected return x risk)
+## Other Works
+
+* Aplicate IL (Imitation Learning) to try to simulate Stock Market
 
 * "Econometricians have come up with plenty of models for stock prices. The one that seems to work in a lot of situations is an autoregressive model for the conditional mean combined with an (G)Arch type model for the volatility. For the volatility model, an assymetric GARCH with a fat-tail distribution (like Student's t) seems to work the best for a variety of financial markets."
 

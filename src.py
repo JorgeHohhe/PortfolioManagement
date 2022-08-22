@@ -14,7 +14,7 @@ def get_mean_of_df_column(df_column):
 def get_standard_deviation_of_df_column(df_column):
     return np.std(df_column)
 
-def calculete_overall_portfolio_return(df, stock_names, weights):
+def calculate_overall_portfolio_return(df, stock_names, weights):
     overall_portfolio_return = 0
     for i, stock_name in enumerate(stock_names):
         overall_portfolio_return += weights[i] * df[stock_name].mean()
@@ -28,7 +28,7 @@ def calculete_portfolio_standard_deviation(df, stock_names, weights):
     portfolio_standard_deviation = np.sqrt(portfolio_standard_deviation)
     return portfolio_standard_deviation
 
-def calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights):
+def calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights):
     # Proxy for risk: standard deviation of the previous 21 days
     portfolio_standard_deviation = 0
     for i, stock_name_i in enumerate(stock_names):
@@ -73,11 +73,13 @@ def plot_graph_from_dataframe(df, days_of_data, graph_name):
     legend_columns = []
     for column in df.columns:
         if '_PRICE' not in column:
+            # Plot Daily Returns Graph
             legend_columns += [column]
             y_daily_return = df[column]
             axs[0].plot(x_daily_return, y_daily_return)
             
         else:
+            # Plot Stock Prices Graph
             y_stock_price = np.append([100], df[column])
             axs[1].plot(x_stock_price, y_stock_price)
     
@@ -94,6 +96,7 @@ def plot_graph_from_dataframe(df, days_of_data, graph_name):
     print(f'Figure saved at: output/{graph_name}-{len(df.columns)//2}stocks-{days_of_data}days.png')
 
 def update_portfolio_weights(weights, daily_dict_to_append, stock_names):
+    # Update needed due to daily return
     for i, weight in enumerate(weights):
         weights[i] = weight * (1 + daily_dict_to_append[stock_names[i]]/100)
     weights = weights/np.sum(weights)
@@ -103,53 +106,57 @@ if __name__ == "__main__":
     # To grants code reproducibility
     np.random.seed(0)
 
+    # Create useful folders
     create_directory('output')
     create_directory('data')
 
+    # Set my Stock Names
     stock_names = ['CD_1', 'CD_2', 'CD_3', 'CS_1', 'CS_2', 'CS_3', 'TECH_1', 'TECH_2', 'UTILITIES_1', 'UTILITIES_2']
 
-    days_of_data = 365*10  # (365 days * 10 years) of data
-    df = pd.read_csv('data/Sample-10stocks-3650days.csv', sep='|')
-    # df = pd.DataFrame({'Placeholder': [0]*days_of_data})
+    # (365 days * 10 years) of data
+    days_of_data = 365*10  
 
-    # for k, stock_name in enumerate(stock_names):
-    #     stock_price = 100
-    #     df[stock_name] = pd.Series([], dtype=np.float64)
-    #     df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
-    #     for i in range(days_of_data): 
-    #         stock_price, daily_return = get_daily_return_value(df.loc[i], stock_price, stock_name)
-    #         df.loc[i, stock_name] = daily_return
-    #         df.loc[i, stock_name + '_PRICE'] = stock_price
-    # df = df.drop(['Placeholder'], axis=1)
-    # # Save the simutation
-    # df.to_csv(f'data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv', sep='|',index=False)
-    # print(f'Stocks Simulated Data saved at: data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv')
+    # Store the dataframe of each stock with daily return and stock price
+    df = pd.DataFrame({'Placeholder': [0]*days_of_data})
+    for k, stock_name in enumerate(stock_names):
+        stock_price = 100
+        df[stock_name] = pd.Series([], dtype=np.float64)
+        df[stock_name + '_PRICE'] = pd.Series([], dtype=np.float64)
+        for i in range(days_of_data): 
+            stock_price, daily_return = get_daily_return_value(df.loc[i], stock_price, stock_name)
+            df.loc[i, stock_name] = daily_return
+            df.loc[i, stock_name + '_PRICE'] = stock_price
+    df = df.drop(['Placeholder'], axis=1)
+    # Save the simutation
+    df.to_csv(f'data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv', sep='|',index=False)
+    print(f'Stocks Simulated Data saved at: data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv')
 
-    # Overall information about stocks data
-    weights = [0.1]*10
-    overall_market_return = calculete_overall_portfolio_return(df, stock_names, weights)
+    # Overall information about the market stocks data
+    weights = [0.1]*10  # considered equal weights = mean of the market
+    overall_market_return = calculate_overall_portfolio_return(df, stock_names, weights)
     print(f'\nOverall Market Return: {overall_market_return} %')
     
     market_standard_deviation = calculete_portfolio_standard_deviation(df, stock_names, weights)
     print(f'\nMarket Standard Deviation: {market_standard_deviation}\n')
 
     # Plot graphs
-    # plot_graph_from_dataframe(df, days_of_data, 'Sample')
-    # for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
-    #     plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
+    plot_graph_from_dataframe(df, days_of_data, 'Sample')
+    for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
+        plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
 
     ### FIRST MONTH
+    # Dataframe to store daily weights updates
     df_weights = pd.DataFrame(columns=['Weights'])
     # Initial Capital Allocation
-    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
-    print(f'Acceptable Risk: {acceptable_risk}')
+    acceptable_risk = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'Acceptable Risk: {acceptable_risk}', end='')
     num_simulations = 5
     efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
     for i in range(num_simulations):
         weights = np.random.random(len(stock_names))
         weights = weights/np.sum(weights)
-        returns = calculete_overall_portfolio_return(df, stock_names, weights)
-        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        returns = calculate_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
         efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
     index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
     weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
@@ -176,15 +183,15 @@ if __name__ == "__main__":
         df_weights = df_weights.append({'Weights': weights}, ignore_index=True)
         df = df.append(daily_dict_to_append, ignore_index=True)
     # Rebalance the portfolio
-    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
-    print(f'\nAcceptable Risk: {acceptable_risk}')
+    acceptable_risk = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'\nAcceptable Risk: {acceptable_risk}', end='')
     num_simulations = 5
     efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
     for i in range(num_simulations):
         weights = np.random.random(len(stock_names))
         weights = weights/np.sum(weights)
-        returns = calculete_overall_portfolio_return(df, stock_names, weights)
-        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        returns = calculate_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
         efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
     index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
     weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
@@ -216,15 +223,15 @@ if __name__ == "__main__":
         df_weights = df_weights.append({'Weights': weights}, ignore_index=True)
         df = df.append(daily_dict_to_append, ignore_index=True)
     # Rebalance the portfolio
-    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
-    print(f'\nAcceptable Risk: {acceptable_risk}')
+    acceptable_risk = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'\nAcceptable Risk: {acceptable_risk}', end='')
     num_simulations = 5
     efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
     for i in range(num_simulations):
         weights = np.random.random(len(stock_names))
         weights = weights/np.sum(weights)
-        returns = calculete_overall_portfolio_return(df, stock_names, weights)
-        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        returns = calculate_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculate_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
         efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
     index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
     weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
@@ -257,6 +264,7 @@ if __name__ == "__main__":
         df = df.append(daily_dict_to_append, ignore_index=True)
 
     ### PORTFOLIO PERFORMANCE
+    print('Portfolio Performance')
     # Return
     portfolio_return = 1
     month_portfolio_return = 1
