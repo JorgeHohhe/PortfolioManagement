@@ -60,11 +60,11 @@ and the overall portfolio risk (Std-dev)_p as:
 
 where cor-cof is the correlation coefficient between returns of assets i and j.
 
-For our simulated data, we have:
+Applying the above formula to our simulated data, we have (equal weights between all stocks):
 
-* Overall Portfolio Return: 0.02044 %
+* Overall Market Return: 0.02044 %
 
-* Portfolio Standard Deviation: 9.9909 %
+* Market Standard Deviation: 9.9909 %
 
 # Future Works
 
@@ -79,7 +79,11 @@ Source: https://stackoverflow.com/questions/8597731/are-there-known-techniques-t
 # Other Sources
 
 https://en.wikipedia.org
+
 https://www.investopedia.com
+
 https://stackoverflow.com
+
 https://corporatefinanceinstitute.com/resources/knowledge/finance/the-sp-sectors/
+
 https://quantpy.com.au/stochastic-calculus/simulating-geometric-brownian-motion-gbm-in-python/
