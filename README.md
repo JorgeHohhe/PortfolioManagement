@@ -72,6 +72,8 @@ Applying the above formula to our simulated data, we have (equal weights between
 
 * Consider national economy influence (Food and Staples Retailing Market has a high correlation with inflation)
 
+* Plot  efficient frontier graph (expected return x risk)
+
 * "Econometricians have come up with plenty of models for stock prices. The one that seems to work in a lot of situations is an autoregressive model for the conditional mean combined with an (G)Arch type model for the volatility. For the volatility model, an assymetric GARCH with a fat-tail distribution (like Student's t) seems to work the best for a variety of financial markets."
 
 ** Source: https://stackoverflow.com/questions/8597731/are-there-known-techniques-to-generate-realistic-looking-fake-stock-data

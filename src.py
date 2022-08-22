@@ -28,6 +28,20 @@ def calculete_portfolio_standard_deviation(df, stock_names, weights):
     portfolio_standard_deviation = np.sqrt(portfolio_standard_deviation)
     return portfolio_standard_deviation
 
+def calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights):
+    # Proxy for risk: standard deviation of the previous 21 days
+    portfolio_standard_deviation = 0
+    for i, stock_name_i in enumerate(stock_names):
+        for j, stock_name_j in enumerate(stock_names):
+            portfolio_standard_deviation += weights[i] * weights[j] * get_standard_deviation_of_df_column(df[stock_name_i][-21:]) * get_standard_deviation_of_df_column(df[stock_name_j][-21:]) * np.corrcoef([df[stock_name_i][-21:], df[stock_name_j][-21:]])[0][1]
+    portfolio_standard_deviation = np.sqrt(portfolio_standard_deviation)
+    return portfolio_standard_deviation
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
 def get_daily_return_value(df, stock_price, stock_name):
     # GBM (Geometric Brownian Motion) + random volatility
     volatility = np.random.uniform(low=0.0004, high=0.004)
@@ -79,6 +93,12 @@ def plot_graph_from_dataframe(df, days_of_data, graph_name):
     fig.savefig(f'output/{graph_name}-{len(df.columns)//2}stocks-{days_of_data}days.png')
     print(f'Figure saved in: output/{graph_name}-{len(df.columns)//2}stocks-{days_of_data}days.png')
 
+def update_portfolio_weights(weights, daily_dict_to_append, stock_names):
+    for i, weight in enumerate(weights):
+        weights[i] = weight * (1 + daily_dict_to_append[stock_names[i]]/100)
+    weights = weights/np.sum(weights)
+    return weights
+
 if __name__ == "__main__":
     # To grants code reproducibility
     np.random.seed(0)
@@ -105,15 +125,109 @@ if __name__ == "__main__":
     # df.to_csv(f'data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv', sep='|',index=False)
     # print(f'Stocks Simulated Data saved in: data/Sample-{len(df.columns)//2}stocks-{days_of_data}days.csv')
 
+    # Overall information about stocks data
     weights = [0.1]*10
-    overall_portfolio_return = calculete_overall_portfolio_return(df, stock_names, weights)
-    print(f'\nOverall Portfolio Return: {overall_portfolio_return} %')
+    overall_market_return = calculete_overall_portfolio_return(df, stock_names, weights)
+    print(f'\nOverall Market Return: {overall_market_return} %')
     
-    portfolio_standard_deviation = calculete_portfolio_standard_deviation(df, stock_names, weights)
-    print(f'\nPortfolio Standard Deviation: {portfolio_standard_deviation}\n')
+    market_standard_deviation = calculete_portfolio_standard_deviation(df, stock_names, weights)
+    print(f'\nMarket Standard Deviation: {market_standard_deviation}\n')
 
-    plot_graph_from_dataframe(df, days_of_data, 'Sample')
-    for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
-        plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
+    # Plot graphs
+    # plot_graph_from_dataframe(df, days_of_data, 'Sample')
+    # for market_sector in ['CD', 'CS', 'TECH', 'UTILITIES']:
+    #     plot_graph_from_dataframe(df[[stock for stock in df.columns if market_sector in stock]], days_of_data, market_sector)
+
+    ### FIRST MONTH
+    # Initial Capital Allocation
+    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'Acceptable Risk: {acceptable_risk}')
+    num_simulations = 5
+    efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
+    for i in range(num_simulations):
+        weights = np.random.random(len(stock_names))
+        weights = weights/np.sum(weights)
+        returns = calculete_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
+    index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
+    weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
+    
+    first_month_weights = weights
+    print('\nFirst month composition of my portfolio:')
+    for i, stock_name in enumerate(stock_names):
+        print(f'{stock_name}: {first_month_weights[i]:.6f}')
+
+    ### SECOND MONTH
+    # Simulate more 21 days and update portfolio weights each day
+    days_of_data = 21
+    start_position_index = len(df) - 1
+    for i in range(days_of_data):
+        daily_dict_to_append = {}
+        stock_prices, daily_returns = [], []
+        for stock_name in stock_names:
+            stock_price = df[stock_name+'_PRICE'][len(df)-1]
+            stock_price, daily_return = get_daily_return_value(df.loc[i+start_position_index], stock_price, stock_name)
+            daily_dict_to_append[stock_name+'_PRICE'] = stock_price[0]
+            daily_dict_to_append[stock_name] = daily_return[0]
+        weights = update_portfolio_weights(weights, daily_dict_to_append, stock_names)
+        df = df.append(daily_dict_to_append, ignore_index=True)
+    # Rebalance the portfolio
+    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'\nAcceptable Risk: {acceptable_risk}')
+    num_simulations = 5
+    efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
+    for i in range(num_simulations):
+        weights = np.random.random(len(stock_names))
+        weights = weights/np.sum(weights)
+        returns = calculete_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
+    index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
+    weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
+
+    second_month_weights = weights
+    print('\nSecond month composition of my portfolio:')
+    for i, stock_name in enumerate(stock_names):
+        print(f'{stock_name}: {second_month_weights[i]:.6f}')
+    print('\nTrades:')
+    for i, stock_name in enumerate(stock_names):
+        print(f'{stock_name}: {100*(second_month_weights[i] - first_month_weights[i])/first_month_weights[i]:.6f} %')
+
+    ### THIRD MONTH
+    # Simulate more 21 days and update portfolio weights each day
+    days_of_data = 21
+    start_position_index = len(df) - 1
+    for i in range(days_of_data):
+        daily_dict_to_append = {}
+        stock_prices, daily_returns = [], []
+        for stock_name in stock_names:
+            stock_price = df[stock_name+'_PRICE'][len(df)-1]
+            stock_price, daily_return = get_daily_return_value(df.loc[i+start_position_index], stock_price, stock_name)
+            daily_dict_to_append[stock_name+'_PRICE'] = stock_price[0]
+            daily_dict_to_append[stock_name] = daily_return[0]
+        weights = update_portfolio_weights(weights, daily_dict_to_append, stock_names)
+        df = df.append(daily_dict_to_append, ignore_index=True)
+    # Rebalance the portfolio
+    acceptable_risk = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+    print(f'\nAcceptable Risk: {acceptable_risk}')
+    num_simulations = 5
+    efficient_frontier = pd.DataFrame(columns=['Weights', 'Returns', 'Std_dev'])
+    for i in range(num_simulations):
+        weights = np.random.random(len(stock_names))
+        weights = weights/np.sum(weights)
+        returns = calculete_overall_portfolio_return(df, stock_names, weights)
+        std_dev = calculete_portfolio_standard_deviation_previous_21_days(df, stock_names, weights)
+        efficient_frontier = efficient_frontier.append({'Weights': weights, 'Returns': returns, 'Std_dev': std_dev}, ignore_index=True)
+    index_nearest_to_acceptable_risk = find_nearest(efficient_frontier['Std_dev'], acceptable_risk)
+    weights = efficient_frontier['Weights'][index_nearest_to_acceptable_risk]
+
+    third_month_weights = weights
+    print('\nThird month composition of my portfolio:')
+    for i, stock_name in enumerate(stock_names):
+        print(f'{stock_name}: {third_month_weights[i]:.6f}')
+    print('\nTrades:')
+    for i, stock_name in enumerate(stock_names):
+        print(f'{stock_name}: {100*(third_month_weights[i] - second_month_weights[i])/second_month_weights[i]:.6f} %')
 
     print('\nPipeline Finished!')
