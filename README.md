@@ -69,78 +69,45 @@ Applying the above formula to our simulated data, we have (equal weights between
 # Question 3
 
 * First month composition of my portfolio:
-
-CD_1: 0.097602
-
-CD_2: 0.137589
-
-CD_3: 0.044159
-
-CS_1: 0.115306
-
-CS_2: 0.136988
-
-CS_3: 0.110550
-
-TECH_1: 0.063866
-
-TECH_2: 0.124480
-
-UTILITIES_1: 0.117612
-
-UTILITIES_2: 0.051847
+	* CD_1: 0.097602
+	* CD_2: 0.137589
+	* CD_3: 0.044159
+	* CS_1: 0.115306
+	* CS_2: 0.136988
+	* CS_3: 0.110550
+	* TECH_1: 0.063866
+	* TECH_2: 0.124480
+	* UTILITIES_1: 0.117612
+	* UTILITIES_2: 0.051847
 
 * Trades for Second month:
-
-CD_1: 66.934120 %
-
-CD_2: -21.272943 %
-
-CD_3: 50.232776 %
-
-CS_1: 48.073879 %
-
-CS_2: -89.285378 %
-
-CS_3: 39.828943 %
-
-TECH_1: 143.404125 %
-
-TECH_2: -44.884761 %
-
-UTILITIES_1: -30.774548 %
-
-UTILITIES_2: -71.664230 %
+	* CD_1: 66.934120 %
+	* CD_2: -21.272943 %
+	* CD_3: 50.232776 %
+	* CS_1: 48.073879 %
+	* CS_2: -89.285378 %
+	* CS_3: 39.828943 %
+	* TECH_1: 143.404125 %
+	* TECH_2: -44.884761 %
+	* UTILITIES_1: -30.774548 %
+	* UTILITIES_2: -71.664230 %
 
 * Trades for Third month
-
-CD_1: -39.286860 %
-
-CD_2: -95.694088 %
-
-CD_3: 155.718475 %
-
-CS_1: -79.209583 %
-
-CS_2: 819.364055 %
-
-CS_3: 5.951559 %
-
-TECH_1: -35.694130 %
-
-TECH_2: 135.121817 %
-
-UTILITIES_1: 8.850151 %
-
-UTILITIES_2: 179.592657 %
+	* CD_1: -39.286860 %
+	* CD_2: -95.694088 %
+	* CD_3: 155.718475 %
+	* CS_1: -79.209583 %
+	* CS_2: 819.364055 %
+	* CS_3: 5.951559 %
+	* TECH_1: -35.694130 %
+	* TECH_2: 135.121817 %
+	* UTILITIES_1: 8.850151 %
+	* UTILITIES_2: 179.592657 %
 
 * Portfolio Performance
-
-** Return: 1.325144 %
-
-** Monthly Volatility: 0.005010
-
-** Sharpe Ratio: 2.645185
+	* Return: 1.325144 %
+	* Monthly Volatility: 0.005010
+	* Sharpe Ratio: 2.645185
 
 # Future Works
 
@@ -155,8 +122,7 @@ UTILITIES_2: 179.592657 %
 * Aplicate IL (Imitation Learning) to try to simulate Stock Market
 
 * "Econometricians have come up with plenty of models for stock prices. The one that seems to work in a lot of situations is an autoregressive model for the conditional mean combined with an (G)Arch type model for the volatility. For the volatility model, an assymetric GARCH with a fat-tail distribution (like Student's t) seems to work the best for a variety of financial markets."
-
-** Source: https://stackoverflow.com/questions/8597731/are-there-known-techniques-to-generate-realistic-looking-fake-stock-data
+	* Source: https://stackoverflow.com/questions/8597731/are-there-known-techniques-to-generate-realistic-looking-fake-stock-data
 
 # Other Sources
 
